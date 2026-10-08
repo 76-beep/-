@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>نظام أوركيد المؤسسي - Google Material Workspace</title>
+  
+  <!-- خطوط جوجل الرسمية وأيقونات Material Symbols الرسمية -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  
+  <!-- مكتبة Chart.js للرسوم البيانية التفاعلية -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+    <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="أوركيد">
+  <meta name="theme-color" content="#1a73e8">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="google-theme">
+
+  <!-- شريط التنبيهات السريعة Toast بتصميم جوجل سناك بار Snackbar -->
+  <div id="toastNotification" class="google-snackbar"></div>
+
+  <!-- نافذة دليل اختصارات لوحة المفاتيح -->
+  <div id="shortcutsModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="material-symbols-outlined text-primary">keyboard</span>
+          <h3 data-i18n="shortcutsTitle">دليل اختصارات لوحة المفاتيح</h3>
+        </div>
+        <button type="button" class="btn-icon" onclick="closeShortcutsModal()"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcuts-list">
+          <div class="shortcut-row"><span class="kbd">Ctrl + S</span><span data-i18n="scSave">حفظ وترحيل النموذج النشط فوراً</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 1</span><span data-i18n="scDash">الانتقال إلى لوحة المؤشرات والرسوم</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 2</span><span data-i18n="scSales">الانتقال إلى إغلاق المبيعات والمرفقات</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 3</span><span data-i18n="scAudit">الانتقال إلى التدقيق والمطابقة الأعمى</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 4</span><span data-i18n="scTreasury">الانتقال إلى الخزينة واستلام الكاش</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 5</span><span data-i18n="scChat">فتح محادثات الفروع والإدارة (شات)</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 6</span><span data-i18n="scExpenses">الانتقال إلى إدارة المصاريف</span></div>
+          <div class="shortcut-row"><span class="kbd">Alt + 7</span><span data-i18n="scReports">الانتقال إلى التقارير والتصدير</span></div>
+          <div class="shortcut-row"><span class="kbd">Esc</span><span data-i18n="scClose">إغلاق النوافذ المنبثقة والقوائم</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- شاشة تسجيل الدخول بتصميم Google Workspace النقي -->
+  <div id="login-container" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="google-logo-icon">
+          <span class="material-symbols-outlined g-icon">business_center</span>
+        </div>
+        <h2>نظام أوركيد المؤسسي</h2>
+        <p data-i18n="loginSub">منصة إدارة المبيعات والشبكات والخزينة والشات الموحد</p>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event); return false;">
+        <div class="form-group">
+          <label data-i18n="username">اسم المستخدم</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-outlined input-icon">person</span>
+            <input type="text" id="loginUsername" required class="form-control" placeholder="أدخل اسم المستخدم" autocomplete="username">
+          </div>
+        </div>
+        <div class="form-group">
+          <label data-i18n="password">كلمة المرور</label>
+          <div class="input-with-icon">
+            <span class="material-symbols-outlined input-icon">lock</span>
+            <input type="password" id="loginPassword" required class="form-control" placeholder="أدخل كلمة المرور" autocomplete="current-password">
+          </div>
+        </div>
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-block" data-i18n="loginBtn">تسجيل الدخول</button>
+        <div id="loginError" class="alert alert-danger" style="display: none;"></div>
+      </form>
+
+      <div class="login-footer">
+        <div class="api-status">
+          <span id="apiStatusDot" class="status-dot online"></span>
+          <span id="apiStatusText" data-i18n="connectedDb">متصل بقاعدة البيانات</span>
+        </div>
+        <button type="button" class="btn-link" onclick="toggleLanguage()"><span class="material-symbols-outlined" style="font-size:16px;">translate</span> <span id="loginLangBtnText">English</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- النظام التشغيلي الكامل بتصميم Google Workspace -->
+  <div id="app-container" style="display: none;">
+
+    <!-- القائمة الجانبية Google Workspace Drawer -->
+    <aside class="sidebar" id="mainSidebar">
+      <div class="sidebar-header">
+        <div class="brand-badge">
+          <span class="material-symbols-outlined brand-icon">corporate_fare</span>
+          <span class="brand-text">أوركيد المؤسسي</span>
+        </div>
+        <div class="user-meta">
+          <span id="userNameDisplay" class="user-name">-</span>
+          <span id="userBadge" class="user-badge">-</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu" id="sideNavMenu">
+        <button type="button" id="navDashboard" onclick="switchView('dashboardView')" class="nav-item active">
+          <span class="material-symbols-outlined nav-icon">analytics</span>
+          <span class="nav-text" data-i18n="navDash">لوحة المؤشرات والرسوم</span>
+        </button>
+        <button type="button" id="navSales" onclick="switchView('salesView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">payments</span>
+          <span class="nav-text" data-i18n="navSales">إغلاق المبيعات والمرفقات</span>
+        </button>
+        <button type="button" id="navAudit" onclick="switchView('auditView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">fact_check</span>
+          <span class="nav-text" data-i18n="navAudit">التدقيق والمطابقة الأعمى</span>
+        </button>
+        <button type="button" id="navTreasury" onclick="switchView('treasuryView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">account_balance</span>
+          <span class="nav-text" data-i18n="navTreasury">الخزينة واستلام الكاش</span>
+        </button>
+        <button type="button" id="navChat" onclick="switchView('chatView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">forum</span>
+          <span class="nav-text" data-i18n="navChat">المحادثات المباشرة (شات)</span>
+        </button>
+        <button type="button" id="navExpenses" onclick="switchView('expensesView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">receipt_long</span>
+          <span class="nav-text" data-i18n="navExpenses">إدارة واعتماد المصاريف</span>
+        </button>
+        <button type="button" id="navNetworks" onclick="switchView('networksView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">credit_card</span>
+          <span class="nav-text" data-i18n="navNetworks">شبكات ونقاط البيع</span>
+        </button>
+        <button type="button" id="navUsers" onclick="switchView('usersView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">group</span>
+          <span class="nav-text" data-i18n="navUsers">المستخدمين والصلاحيات</span>
+        </button>
+        <button type="button" id="navBranches" onclick="switchView('branchesView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">storefront</span>
+          <span class="nav-text" data-i18n="navBranches">الفروع والمواقع</span>
+        </button>
+        <button type="button" id="navReports" onclick="switchView('reportsView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">description</span>
+          <span class="nav-text" data-i18n="navReports">التقارير A4 & Excel</span>
+        </button>
+        <button type="button" id="navTasks" onclick="switchView('tasksView')" class="nav-item">
+          <span class="material-symbols-outlined nav-icon">task_alt</span>
+          <span class="nav-text">إدارة المهام والعمليات</span>
+          <span id="tasksCountBadge" class="cum-badge" style="margin-right:auto; display:none;">0</span>
+        </button>
+        <button type="button" onclick="logout()" class="nav-item nav-logout">
+          <span class="material-symbols-outlined nav-icon">logout</span>
+          <span class="nav-text" data-i18n="navLogout">تسجيل الخروج</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button type="button" class="btn-shortcuts-hint" onclick="openShortcutsModal()">
+          <span class="material-symbols-outlined">keyboard</span>
+          <span data-i18n="shortcutsBtn">دليل الاختصارات</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- مساحة العمل الرئيسية Google Workspace Header & View Container -->
+    <main class="main-content">
+      
+      <!-- الشريط العلوي المستوحى من Google Workspace -->
+      <header class="top-nav">
+        <div class="top-nav-left">
+          <button type="button" class="btn-icon btn-toggle-sidebar" onclick="toggleMobileSidebar()">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <h2 id="pageTitle" data-i18n="pageTitleDash">لوحة المؤشرات والرسوم البيانية</h2>
+        </div>
+
+        <div class="top-nav-actions">
+          <!-- زر تبديل اللغة (عربي / English) -->
+          <button type="button" class="btn btn-sm btn-pill" onclick="toggleLanguage()">
+            <span class="material-symbols-outlined" style="font-size:18px;">translate</span>
+            <span id="langText">English</span>
+          </button>
+
+          <!-- زر جرس الإشعارات والتحديثات -->
+          <div class="notification-wrapper">
+            <button type="button" class="btn-icon btn-bell" onclick="toggleNotificationsDropdown()">
+              <span class="material-symbols-outlined">notifications</span>
+              <span id="notifBadge" class="notif-badge" style="display: none;">0</span>
+            </button>
+            <div id="notifDropdown" class="notif-dropdown" style="display: none;">
+              <div class="notif-header">
+                <h4 data-i18n="notifications">الإشعارات والتحديثات</h4>
+                <button type="button" class="btn-link" onclick="loadSystemNotifications()" data-i18n="refresh">تحديث</button>
+              </div>
+              <div id="notifList" class="notif-list">
+                <p class="notif-empty" data-i18n="noNotifs">لا توجد إشعارات جديدة حالياً</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="syncStatusBadge" class="sync-badge synced" onclick="manualSyncTrigger()" title="حالة الاتصال والمزامنة الفورية">
+            <span class="material-symbols-outlined sync-icon" id="syncStatusIcon">cloud_done</span>
+            <span id="syncStatusText">متصل ومزامن</span>
+          </div>
+
+          <span class="branch-chip">
+            <span class="material-symbols-outlined chip-icon">store</span>
+            <strong id="currentBranchDisplay">-</strong>
+          </span>
+
+          <button type="button" class="btn-icon" onclick="toggleTheme()" id="themeToggleBtn" title="تبديل الوضع الليلي والنهاري">
+            <span class="material-symbols-outlined" id="themeIcon">dark_mode</span>
+          </button>
+
+
+        </div>
+      </header>
+
+      <!-- حاوية المشاهد والتبويبات -->
+      <div class="view-container">
+        <!-- شريط تثبيت PWA للهواتف الذكية -->
+        <div id="pwaInstallBanner" class="pwa-install-banner">
+          <span class="pwa-text">📲 هل تود تثبيت تطبيق أوركيد على شاشة هاتفك الرئيسية؟</span>
+          <button type="button" class="btn-install" onclick="installPWA()">تثبيت التطبيق</button>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- 1. لوحة المؤشرات الموسعة والرسوم البيانية المتقدمة (Dashboard) -->
+        <!-- ============================================================== -->
+        <section id="dashboardView" class="view-section">
+          <!-- شريط الفلاتر الذكية للمدير والمشرفين -->
+          <div class="filter-panel card">
+            <div class="filter-row">
+              <div class="filter-group">
+                <label data-i18n="filterBranch">تصفية الفرع:</label>
+                <select id="dashBranchFilter" class="form-control form-control-sm" onchange="refreshDashboard()">
+                  <option value="ALL" data-i18n="allBranchesOpt">جميع الفروع الموحدة</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label data-i18n="fromDate">من تاريخ:</label>
+                <input type="date" id="dashStartDate" class="form-control form-control-sm" onchange="refreshDashboard()">
+              </div>
+              <div class="filter-group">
+                <label data-i18n="toDate">إلى تاريخ:</label>
+                <input type="date" id="dashEndDate" class="form-control form-control-sm" onchange="refreshDashboard()">
+              </div>
+              <div class="filter-actions">
+                <button type="button" class="btn btn-sm btn-filter" onclick="setDashDateQuick('today')" data-i18n="today">اليوم</button>
+                <button type="button" class="btn btn-sm btn-filter" onclick="setDashDateQuick('yesterday')">أمس</button>
+                <button type="button" class="btn btn-sm btn-filter" onclick="setDashDateQuick('week')">هذا الأسبوع</button>
+                <button type="button" class="btn btn-sm btn-filter" onclick="setDashDateQuick('month')" data-i18n="thisMonth">هذا الشهر</button>
+                <button type="button" class="btn btn-sm btn-filter" onclick="setDashDateQuick('all')" data-i18n="all">الكل</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- بطاقات المؤشرات المالية القيادية -->
+          <div class="kpi-grid">
+            <div class="kpi-card card">
+              <div class="kpi-header">
+                <span class="kpi-title" data-i18n="kpiTotalSales">إجمالي المبيعات المحققة</span>
+                <span class="material-symbols-outlined kpi-icon text-primary">payments</span>
+              </div>
+              <span id="dashTotalSales" class="kpi-value text-primary">0.00 ر.س</span>
+            </div>
+            <div class="kpi-card card">
+              <div class="kpi-header">
+                <span class="kpi-title" data-i18n="kpiCashSales">مبيعات النقد (الكاش)</span>
+                <span class="material-symbols-outlined kpi-icon text-accent">attach_money</span>
+              </div>
+              <span id="dashTotalCash" class="kpi-value text-accent">0.00 ر.س</span>
+            </div>
+            <div class="kpi-card card">
+              <div class="kpi-header">
+                <span class="kpi-title" data-i18n="kpiPosSales">مبيعات الشبكات ونقاط البيع</span>
+                <span class="material-symbols-outlined kpi-icon text-info">credit_card</span>
+              </div>
+              <span id="dashTotalPOS" class="kpi-value text-info">0.00 ر.س</span>
+            </div>
+            <div class="kpi-card card">
+              <div class="kpi-header">
+                <span class="kpi-title" data-i18n="kpiExpenses">المصروفات وسندات الصرف</span>
+                <span class="material-symbols-outlined kpi-icon text-danger">receipt_long</span>
+              </div>
+              <span id="dashTotalExpenses" class="kpi-value text-danger">0.00 ر.س</span>
+            </div>
+            <div class="kpi-card card">
+              <div class="kpi-header">
+                <span class="kpi-title" data-i18n="kpiNetFlow">صافي السيولة والتدفق</span>
+                <span class="material-symbols-outlined kpi-icon text-success">account_balance_wallet</span>
+              </div>
+              <span id="dashNetIncome" class="kpi-value text-success">0.00 ر.س</span>
+            </div>
+            <div class="kpi-card card">
+              <div class="kpi-header">
+                <span class="kpi-title" data-i18n="kpiPendingAudits">إغلاقات بانتظار التدقيق</span>
+                <span class="material-symbols-outlined kpi-icon text-warning">pending_actions</span>
+              </div>
+              <span id="dashPendingAudits" class="kpi-value text-warning">0</span>
+            </div>
+          </div>
+
+          <!-- الرسوم البيانية التفاعلية المتقدمة (Charts Grid) -->
+          <div class="charts-grid">
+            <div class="card chart-card">
+              <div class="card-header">
+                <h3 data-i18n="chartTrendTitle">📈 اتجاه المبيعات اليومية (Sales Trend)</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="salesTrendChart"></canvas>
+              </div>
+            </div>
+            <div class="card chart-card">
+              <div class="card-header">
+                <h3 data-i18n="chartShareTitle">🍩 توزيع مبيعات شبكات الدفع ونقاط البيع</h3>
+              </div>
+              <div class="chart-container">
+                <canvas id="networksShareChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+              <h3 data-i18n="chartBranchCompTitle">📊 مقارنة مبيعات الفروع الموحدة</h3>
+            </div>
+            <div class="chart-container" style="height: 280px;">
+              <canvas id="branchesBarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- تفصيل شبكات الدفع -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+              <h3 data-i18n="networkBreakdownTitle">💳 تفصيل مبيعات كل وسيلة دفع ونقطة بيع</h3>
+            </div>
+            <div id="dashNetworksContainer" class="networks-summary-grid">
+              <p style="color: var(--text-muted);" data-i18n="loading">جاري تحميل إحصائيات الشبكات...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 2. شاشة إغلاق المبيعات مع حسم المصاريف والمرفقات -->
+        <!-- ============================================================== -->
+        <section id="salesView" class="view-section" style="display: none;">
+          <div class="card form-card">
+            <div class="card-header">
+              <h3 data-i18n="salesFormTitle">نموذج إغلاق المبيعات اليومي للفرع</h3>
+              <p class="subtitle" data-i18n="salesFormSub">يدخل الموظف الكاش الفعلي، مصاريف الوردية إن وجدت، ومبيعات الشبكات مع إرفاق صور الإيصالات</p>
+            </div>
+
+            <form id="salesForm" onsubmit="submitSales(event); return false;">
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="closingDate">تاريخ الإغلاق</label>
+                  <input type="date" id="salesDate" required class="form-control">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="branch">الفرع</label>
+                  <select id="salesBranchSelect" class="form-control" onchange="renderDynamicSalesNetworks()"></select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="actualCashLabel">💵 الكاش الفعلي في الصندوق (ريال)</label>
+                  <input type="number" step="0.01" id="salesActualCash" inputmode="decimal" oninput="calcSalesTotal()" required class="form-control" value="0">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="shiftExpLabel">🧾 مصاريف الوردية المخصومة من الكاش (ريال)</label>
+                  <input type="number" step="0.01" id="salesShiftExpenses" inputmode="decimal" oninput="calcSalesTotal()" class="form-control" value="0" placeholder="أدخل مبلغ أي مصاريف تم صرفها">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label data-i18n="netHandoverLabel">💰 صافي الكاش المورد لمسؤول الخزينة (الكاش الفعلي - مصاريف الوردية)</label>
+                <input type="number" step="0.01" id="salesNetCashHandover" readonly class="form-control readonly-input text-success" value="0">
+              </div>
+
+              <div class="network-inputs-wrapper">
+                <label class="section-label" data-i18n="activeNetworksLabel">💳 مبيعات الشبكات ونقاط البيع المفعلة لهذا الفرع:</label>
+                <div id="dynamicNetworksContainer" class="dynamic-inputs-grid">
+                  <p style="color: var(--text-muted); font-size: 0.85rem;" data-i18n="loading">جاري جلب شبكات الفرع...</p>
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 15px;">
+                <label data-i18n="totalSalesLabel">📊 إجمالي المبيعات المحققة (الكاش الفعلي + جميع الشبكات)</label>
+                <input type="number" step="0.01" id="salesTotal" readonly class="form-control readonly-input" value="0">
+              </div>
+
+              <div class="form-group attachment-section">
+                <label class="section-label" data-i18n="attachmentsLabel">📎 إرفاق صور إيصالات الشبكة وعد الصندوق (ترفع تلقائياً إلى Google Drive):</label>
+                <input type="file" id="salesAttachmentsInput" multiple accept="image/*,.pdf" class="form-control" onchange="handleSalesAttachmentsPreview(this)">
+                <div id="attachmentsPreviewList" class="attachments-preview-grid"></div>
+              </div>
+
+              <div class="form-group">
+                <label data-i18n="notes">ملاحظات الكاشير حول الوردية أو الفروقات</label>
+                <textarea id="salesNotes" class="form-control" rows="2" placeholder="أدخل أي ملاحظات هامة..."></textarea>
+              </div>
+
+              <button type="submit" id="salesSubmitBtn" class="btn btn-primary btn-block" data-i18n="submitSalesBtn">ترحيل الإغلاق اليومي للمحاسبة (Ctrl+S)</button>
+            </form>
+          </div>
+
+          <div class="card" style="margin-top: 25px;">
+            <div class="card-header flex-header">
+              <h3 data-i18n="salesHistoryTitle">سجل الإغلاقات السابقة وإشعارات الاعتماد</h3>
+              <div class="table-filters">
+                <select id="salesStatusFilter" class="form-control form-control-sm" onchange="loadSalesHistory()">
+                  <option value="ALL" data-i18n="allStatuses">جميع الحالات</option>
+                  <option value="Pending" data-i18n="pending">بانتظار التدقيق</option>
+                  <option value="Matched" data-i18n="matched">مطابق معتمد</option>
+                  <option value="Discrepancy" data-i18n="hasDiscrepancy">يوجد عجز / زيادة</option>
+                </select>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table id="salesHistoryTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colSalesId">رقم الإغلاق</th>
+                    <th data-i18n="colDate">التاريخ</th>
+                    <th data-i18n="colBranch">الفرع</th>
+                    <th data-i18n="colCash">الكاش</th>
+                    <th data-i18n="colPos">الشبكات</th>
+                    <th data-i18n="colNetHandover">صافي التسليم</th>
+                    <th data-i18n="colAttachments">المرفقات</th>
+                    <th data-i18n="colAuditStatus">حالة الاعتماد والمطابقة</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 3. شاشة التدقيق والمطابقة المحاسبية "العمياء" (Blind Audit) -->
+        <!-- ============================================================== -->
+        <section id="auditView" class="view-section" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <h3 data-i18n="auditPendingTitle">قائمة الإغلاقات المعلقة بانتظار التدقيق المحاسبي المستقل</h3>
+              <p class="subtitle" data-i18n="auditPendingSub">المحاسب يدخل أرقام جرد الصندوق الفعلي وكشوفات البنك أولاً لاكتشاف الفروقات آلياً</p>
+            </div>
+            <div class="table-responsive">
+              <table id="pendingSalesTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colSalesId">رقم العملية</th>
+                    <th data-i18n="colDate">التاريخ</th>
+                    <th data-i18n="colBranch">الفرع</th>
+                    <th data-i18n="colCashier">اسم الكاشير</th>
+                    <th data-i18n="colAttachments">المرفقات</th>
+                    <th data-i18n="colAction">الإجراء المحاسبي</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="auditActionCard" class="card form-card" style="display: none; margin-top: 25px; border: 2px solid var(--primary-accent);">
+            <div class="card-header">
+              <h3><span data-i18n="auditReviewFor">مطابقة وتدقيق العملية:</span> <span id="auditTargetID" class="text-primary"></span></h3>
+              <p class="subtitle"><span data-i18n="colBranch">الفرع:</span> <strong id="auditBranchName">-</strong> | <span data-i18n="colCashier">الكاشير:</span> <strong id="auditCashierName">-</strong></p>
+            </div>
+
+            <div id="blindAuditStep1">
+              <div class="alert alert-info" data-i18n="blindAuditAlert">
+                ℹ️ <strong>التدقيق المحاسبي الأعمى:</strong> أدخل المبالغ الفعلية بموجب جرد الخزينة وتقارير تسوية أجهزة مدى والشبكات، وسيقوم النظام بمقارنتها مع إغلاق الكاشير لإظهار أي عجز أو زيادة تلقائياً.
+              </div>
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="actualCashReceived">💵 الكاش الفعلي المستلم بالخزينة (ريال)</label>
+                  <input type="number" step="0.01" id="auditActualCash" class="form-control" placeholder="أدخل مبلغ النقد المستلم">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="actualPosReceived">💳 الشبكة الفعلية بموجب تقرير التسوية (ريال)</label>
+                  <input type="number" step="0.01" id="auditActualPOS" class="form-control" placeholder="أدخل مجموع تسوية نقاط البيع">
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="revealBlindAuditComparison()" data-i18n="calcDiscrepancyBtn">🔍 احتساب وكشف الفروقات والمطابقة</button>
+            </div>
+
+            <div id="blindAuditStep2" style="display: none; margin-top: 20px;">
+              <div class="card-header">
+                <h4 data-i18n="compResultTitle">نتيجة المطابقة التفصيلية:</h4>
+              </div>
+              <div class="table-responsive">
+                <table class="table-comparison">
+                  <thead>
+                    <tr>
+                      <th data-i18n="item">البند</th>
+                      <th data-i18n="sysNumbers">أرقام الكاشير (النظام)</th>
+                      <th data-i18n="actNumbers">أرقام المحاسب (الفعلي)</th>
+                      <th data-i18n="diff">الفرق (الفارق المالي)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td data-i18n="cash">الكاش (النقد)</td>
+                      <td id="cmpSysCash">0.00</td>
+                      <td id="cmpActCash">0.00</td>
+                      <td id="cmpDiffCash" class="diff-cell">0.00</td>
+                    </tr>
+                    <tr>
+                      <td data-i18n="pos">الشبكات (POS)</td>
+                      <td id="cmpSysPOS">0.00</td>
+                      <td id="cmpActPOS">0.00</td>
+                      <td id="cmpDiffPOS" class="diff-cell">0.00</td>
+                    </tr>
+                    <tr class="total-row">
+                      <td><b data-i18n="grandTotal">صافي الإجمالي الكلي</b></td>
+                      <td id="cmpSysTotal"><b>0.00</b></td>
+                      <td id="cmpActTotal"><b>0.00</b></td>
+                      <td id="cmpDiffTotal" class="diff-cell"><b>0.00</b></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div id="auditMatchResultBanner" class="alert" style="margin-top: 15px;"></div>
+
+              <div class="form-group" style="margin-top: 15px;">
+                <label data-i18n="auditorDecisionNotes">ملاحظات وقرار المحاسب المالي</label>
+                <textarea id="auditFinalNotes" class="form-control" rows="2" placeholder="أسباب الفروقات أو قرار التوريد..."></textarea>
+              </div>
+
+              <div class="btn-group" style="margin-top: 15px;">
+                <button type="button" id="auditConfirmBtn" class="btn btn-success" onclick="confirmAuditSubmission()" data-i18n="confirmAuditBtn">✅ اعتماد وتوريد الخزينة</button>
+                <button type="button" class="btn btn-secondary" onclick="resetBlindAuditModal()" data-i18n="reEnter">إعادة الإدخال</button>
+                <button type="button" class="btn btn-outline" onclick="closeBlindAuditModal()" data-i18n="close">إغلاق</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 4. شاشة مسؤول الخزينة واستلام الكاش (Treasury Custodian View) -->
+        <!-- ============================================================== -->
+        <section id="treasuryView" class="view-section" style="display: none;">
+          <div class="card">
+            <div class="card-header flex-header">
+              <div>
+                <h3 data-i18n="treasuryTitle">🏦 خزينة المؤسسة وإدارة السيولة النقدية</h3>
+                <p class="subtitle" data-i18n="treasurySub">متابعة واستلام كاش الفروع الجاهز، وتوثيق رصيد الخزينة وخصم المصروفات المنصرفة</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadTreasuryData()"><span class="material-symbols-outlined" style="font-size:16px;">refresh</span> <span data-i18n="refresh">تحديث</span></button>
+            </div>
+
+            <!-- بطاقات رصيد الخزينة المباشر -->
+            <div class="kpi-grid" style="margin-top: 10px;">
+              <div class="kpi-card card" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: white;">
+                <span class="kpi-title" style="color: #e8f0fe;" data-i18n="currentSafeBalance">الرصيد الفعلي الحالي بالخزينة</span>
+                <span id="trCurrentBalance" class="kpi-value text-success" style="color: #ffffff !important;">0.00 ر.س</span>
+              </div>
+              <div class="kpi-card card">
+                <span class="kpi-title" data-i18n="totalCashCollected">إجمالي المقبوضات الموردة للخزينة</span>
+                <span id="trTotalInflow" class="kpi-value text-primary">0.00 ر.س</span>
+              </div>
+              <div class="kpi-card card">
+                <span class="kpi-title" data-i18n="totalCashDisbursed">إجمالي المصروفات المنصرفة من الخزينة</span>
+                <span id="trTotalOutflow" class="kpi-value text-danger">0.00 ر.س</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- جدول كاش الفروع بانتظار الاستلام -->
+          
+          <!-- قسم الأرصدة التراكمية للفروع غير المسلمة للخزينة -->
+          <div class="card" style="margin-top: 20px;">
+            <div class="card-header flex-header">
+              <div>
+                <h3 style="color:#0F172A; font-weight:800;" data-i18n="cumCashTitle">📊 كشف الأرصدة التراكمية للفروع غير المسلّمة للخزينة</h3>
+                <p class="subtitle" data-i18n="cumCashSub">إجمالي المبالغ النقدية التراكمية المتراكمة في كل فرع والتي لم يستلمها مسؤول الخزينة بعد</p>
+              </div>
+              <div class="cum-grand-total-pill">
+                <span>إجمالي الكاش المعلق لكافة الفروع:</span>
+                <strong id="cumGrandTotalDisplay" class="text-danger" style="font-size:1.1rem; margin-right:6px;">0.00 ر.س</strong>
+              </div>
+            </div>
+            <div id="cumulativeBranchCardsContainer" class="cum-branch-grid">
+              <p style="color:var(--google-gray); padding:10px;">جاري احتساب أرصدة الفروع التراكمية...</p>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 25px;">
+            <div class="card-header">
+              <h3 data-i18n="pendingBranchCashTitle">💵 كاش الفروع الجاهز للتوريد والاستلام بالخزينة</h3>
+              <p class="subtitle" data-i18n="pendingBranchCashSub">المبالغ النقدية الفعلية بعد حسم مصاريف الوردية، اضغط استلام لتضاف فوراً لرصيد خزينتك</p>
+            </div>
+            <div class="table-responsive">
+              <table id="pendingCashTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colSalesId">رقم الإغلاق</th>
+                    <th data-i18n="colDate">التاريخ</th>
+                    <th data-i18n="colBranch">الفرع</th>
+                    <th data-i18n="colNetHandover">صافي الكاش الجاهز للتسليم</th>
+                    <th data-i18n="colCashier">الموظف المسلّم</th>
+                    <th data-i18n="colAction">إجراء الاستلام والتوريد</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- جدول حركات واستاد الخزينة -->
+          <div class="card" style="margin-top: 25px;">
+            <div class="card-header">
+              <h3 data-i18n="treasuryLedgerTitle">📋 دفتر أستاذ حركة الخزينة (وارد / منصرف)</h3>
+            </div>
+            <div class="table-responsive">
+              <table id="treasuryLogTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colEntryId">رقم القيد</th>
+                    <th data-i18n="colDate">التاريخ والوقت</th>
+                    <th data-i18n="colType">نوع الحركة</th>
+                    <th data-i18n="colBranch">الفرع</th>
+                    <th data-i18n="colAmount">المبلغ (ر.س)</th>
+                    <th data-i18n="colDescription">البيان والتفاصيل</th>
+                    <th data-i18n="colResponsible">المسؤول</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 5. محرك محادثات الفروع (شات عام + شات خاص 1:1 بالصور) -->
+        <!-- ============================================================== -->
+        <section id="chatView" class="view-section" style="display: none;">
+          <div class="chat-main-layout card">
+            
+            <aside class="chat-users-sidebar">
+              <div class="chat-users-header">
+                <h4 data-i18n="chatRooms">غرف المحادثة</h4>
+              </div>
+              <div class="chat-channels-list">
+                <button type="button" class="chat-channel-item active" id="channelPublicBtn" onclick="selectChatChannel('ALL', '📢 القناة العامة (كافة الفروع)')">
+                  <span class="material-symbols-outlined channel-icon">campaign</span>
+                  <div class="channel-info">
+                    <strong data-i18n="publicChannel">القناة العامة (جميع الفروع)</strong>
+                    <span class="channel-sub" data-i18n="publicChannelSub">محادثات وإعلانات الإدارة والعمليات</span>
+                  </div>
+                </button>
+              </div>
+
+              <div class="chat-users-header" style="margin-top: 15px;">
+                <h4 data-i18n="directEmployees">المحادثات الخاصة (الموظفين)</h4>
+              </div>
+              <div id="chatEmployeesList" class="chat-employees-list">
+                <p style="color: var(--text-muted); font-size: 0.8rem; padding: 10px;" data-i18n="loading">جاري جلب قائمة الموظفين...</p>
+              </div>
+            </aside>
+
+            <div class="chat-conversation-wrapper">
+              <div class="chat-header">
+                <div class="chat-header-info">
+                  <span id="chatRoomAvatar" class="material-symbols-outlined chat-avatar">campaign</span>
+                  <div>
+                    <h3 id="chatRoomTitle" style="margin-bottom:0;">القناة العامة (كافة الفروع والإدارة)</h3>
+                    <span id="chatRoomStatus" class="chat-status-text" data-i18n="chatSubInfo">محادثة مشفرة مع دعم إرسال الصور الفورية</span>
+                  </div>
+                </div>
+                <div class="chat-header-actions">
+                  <button type="button" class="btn-icon" style="color:white;" onclick="loadChatMessages()"><span class="material-symbols-outlined">refresh</span></button>
+                </div>
+              </div>
+
+              <div id="chatMessagesWindow" class="chat-messages-window">
+                <p style="text-align:center; color:var(--text-muted); margin-top:20px;" data-i18n="loading">جاري تحميل الرسائل...</p>
+              </div>
+
+              <div id="chatImagePreviewBar" class="chat-image-preview-bar" style="display: none;">
+                <img id="chatPreviewImg" src="" alt="Preview">
+                <span id="chatPreviewFileName">صورة مرفقة</span>
+                <button type="button" class="btn-remove-preview" onclick="cancelChatImagePreview()">✕</button>
+              </div>
+
+              <form id="chatForm" onsubmit="sendChatMessage(event); return false;" class="chat-input-bar">
+                <label for="chatFileInput" class="chat-btn-attach" title="إرفاق صورة">
+                  <span class="material-symbols-outlined">add_photo_alternate</span>
+                </label>
+                <input type="file" id="chatFileInput" accept="image/*" style="display:none;" onchange="handleChatImageSelect(this)">
+                <input type="text" id="chatTextInput" class="chat-input-field" placeholder="اكتب رسالتك هنا... (أو أرفق صورة)" autocomplete="off">
+                <button type="submit" id="chatSendBtn" class="chat-btn-send">
+                  <span class="material-symbols-outlined">send</span>
+                </button>
+              </form>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 6. شاشة إدارة شبكات ونقاط البيع (Networks View) -->
+        <!-- ============================================================== -->
+        <section id="networksView" class="view-section" style="display: none;">
+          <div class="card form-card">
+            <div class="card-header flex-header">
+              <div>
+                <h3 data-i18n="networksTitle">إدارة وتخصيص شبكات ونقاط الدفع</h3>
+                <p class="subtitle" data-i18n="networksSub">إضافة شبكات دفع جديدة، وتفعيل أو إيقاف أي شبكة في فروع محددة</p>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="openNewNetworkModal()" data-i18n="addNetworkBtn">+ إضافة شبكة دفع جديدة</button>
+            </div>
+
+            <div class="table-responsive">
+              <table id="networksManagementTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colNetId">معرف الشبكة</th>
+                    <th data-i18n="colNetName">اسم الشبكة</th>
+                    <th data-i18n="colNetCode">الرمز</th>
+                    <th data-i18n="colNetType">النوع</th>
+                    <th data-i18n="colNetStatus">الحالة العامة</th>
+                    <th data-i18n="colNetAllowed">الفروع المصرحة</th>
+                    <th data-i18n="colAction">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="networkModal" class="modal-backdrop" style="display: none;">
+            <div class="modal-card">
+              <div class="modal-header">
+                <h3 id="networkModalTitle" data-i18n="addNetworkBtn">إضافة شبكة دفع جديدة</h3>
+                <button type="button" class="btn-close" onclick="closeNetworkModal()">×</button>
+              </div>
+              <form id="networkForm" onsubmit="submitNetwork(event); return false;">
+                <input type="hidden" id="netEditID">
+                <div class="form-group">
+                  <label data-i18n="netNameLabel">اسم شبكة الدفع</label>
+                  <input type="text" id="netName" required class="form-control" placeholder="مثال: تمارا، تابي، أمريكان إكسبريس">
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-half">
+                    <label data-i18n="netCodeLabel">الرمز الداخلي (Code)</label>
+                    <input type="text" id="netCode" required class="form-control" placeholder="tamara, visa, etc.">
+                  </div>
+                  <div class="form-group col-half">
+                    <label data-i18n="netTypeLabel">النوع (Type)</label>
+                    <select id="netType" class="form-control">
+                      <option value="POS">نقطة بيع بنكية (POS)</option>
+                      <option value="BNPL">دفع آجل / تقسيط (BNPL)</option>
+                      <option value="Bank">تحويل بنكي</option>
+                      <option value="Wallet">محفظة إلكترونية</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label data-i18n="allowedBranchesLabel">الفروع المصرح لها باستخدام هذه الشبكة:</label>
+                  <div id="netBranchesCheckboxes" class="checkbox-grid"></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" data-i18n="saveNetworkBtn">حفظ الشبكة</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 7. شاشة إدارة المصروفات -->
+        <!-- ============================================================== -->
+        <section id="expensesView" class="view-section" style="display: none;">
+          <div class="card form-card">
+            <div class="card-header">
+              <h3 data-i18n="expensesFormTitle">إدراج سند صرف / مصروف جديد</h3>
+            </div>
+            <form id="expenseForm" onsubmit="submitExpense(event); return false;">
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="colDate">التاريخ</label>
+                  <input type="date" id="expDate" required class="form-control">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="colBranch">الفرع</label>
+                  <select id="expBranchSelect" class="form-control"></select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="category">تصنيف المصروف</label>
+                  <select id="expCategory" class="form-control" required>
+                    <option value="رواتب وأجور">رواتب وأجور</option>
+                    <option value="إيجار">إيجار</option>
+                    <option value="كهرباء وماء">كهرباء وماء</option>
+                    <option value="صيانة">صيانة</option>
+                    <option value="مشتريات تشغيلية">مشتريات تشغيلية</option>
+                    <option value="نثريات">نثريات</option>
+                  </select>
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="amount">المبلغ (ريال)</label>
+                  <input type="number" step="0.01" id="expAmount" required class="form-control">
+                </div>
+              </div>
+              <div class="form-group">
+                <label data-i18n="paymentMethod">طريقة الدفع</label>
+                <select id="expPaymentMethod" class="form-control">
+                  <option value="Cash">كاش (نقداً من صندوق الفرع أو الخزينة)</option>
+                  <option value="Network">شبكة / حساب بنكي</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label data-i18n="description">البيان والتفاصيل</label>
+                <textarea id="expDescription" class="form-control" rows="2" required placeholder="وصف وتبرير المصروف..."></textarea>
+              </div>
+              <button type="submit" id="expSubmitBtn" class="btn btn-primary btn-block" data-i18n="submitExpenseBtn">إرسال سند المصروف (Ctrl+S)</button>
+            </form>
+          </div>
+
+          <div class="card" style="margin-top: 25px;">
+            <div class="card-header">
+              <h3 data-i18n="expensesHistoryTitle">سجل المصروفات المعتمدة والمعلقة</h3>
+            </div>
+            <div class="table-responsive">
+              <table id="expensesHistoryTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colExpId">رقم السند</th>
+                    <th data-i18n="colDate">التاريخ</th>
+                    <th data-i18n="colBranch">الفرع</th>
+                    <th data-i18n="category">التصنيف</th>
+                    <th data-i18n="amount">المبلغ</th>
+                    <th data-i18n="paymentMethod">طريقة الدفع</th>
+                    <th data-i18n="colStatus">الحالة</th>
+                    <th data-i18n="colAction">الإجراء</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 8. شاشة إدارة المستخدمين والصلاحيات المخصصة -->
+        <!-- ============================================================== -->
+        <section id="usersView" class="view-section" style="display: none;">
+          <div class="card form-card">
+            <div class="card-header">
+              <h3 id="userFormTitle" data-i18n="userFormTitle">إضافة / تعديل مستخدم وتخصيص صلاحياته</h3>
+              <p class="subtitle" data-i18n="userFormSub">تحديد الأزرار والصفحات التي تظهر لكل موظف بدقة</p>
+            </div>
+
+            <form id="userForm" onsubmit="submitUser(event); return false;">
+              <input type="hidden" id="editUserID">
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="username">اسم المستخدم (Login Username)</label>
+                  <input type="text" id="userUsername" required class="form-control">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="password">كلمة المرور</label>
+                  <input type="password" id="userPassword" class="form-control" placeholder="أدخل كلمة المرور في حال التغيير">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="fullName">الاسم الكامل</label>
+                  <input type="text" id="userFullName" required class="form-control">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="userRoleLabel">الدور الوظيفي العام</label>
+                  <select id="userRole" class="form-control" onchange="autoFillRolePermissions()">
+                    <option value="User">كاشير / مدخل بيانات (User)</option>
+                    <option value="Auditor">محاسب ومدقق مالي (Auditor)</option>
+                    <option value="Treasury">مسؤول خزينة (Treasury Officer)</option>
+                    <option value="Admin">مدير نظام عام (Admin)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label data-i18n="colBranch">الفرع المخصص</label>
+                <select id="userBranchSelect" class="form-control" required></select>
+              </div>
+
+              <div class="permissions-card">
+                <label class="section-label" data-i18n="permMatrixLabel">🔒 مصفوفة الصلاحيات المخصصة للمستخدم:</label>
+                <div class="permissions-grid">
+                  <label class="perm-item"><input type="checkbox" value="VIEW_DASHBOARD" class="perm-check"> 📊 لوحة المؤشرات</label>
+                  <label class="perm-item"><input type="checkbox" value="SUBMIT_SALES" class="perm-check"> 💰 تسجيل إغلاق المبيعات</label>
+                  <label class="perm-item"><input type="checkbox" value="VIEW_SALES" class="perm-check"> 📋 مشاهدة سجل المبيعات</label>
+                  <label class="perm-item"><input type="checkbox" value="AUDIT_SALES" class="perm-check"> 🔍 التدقيق والمطابقة المحاسبية</label>
+                  <label class="perm-item"><input type="checkbox" value="BLIND_AUDIT" class="perm-check"> 🙈 إجراء التدقيق الأعمى المستقل</label>
+                  <label class="perm-item"><input type="checkbox" value="MANAGE_TREASURY" class="perm-check"> 🏦 إدارة الخزينة واستلام الكاش</label>
+                  <label class="perm-item"><input type="checkbox" value="VIEW_VARIANCES" class="perm-check"> ⚖️ كشف تفاصيل الفروقات والعجز</label>
+                  <label class="perm-item"><input type="checkbox" value="MANAGE_NETWORKS" class="perm-check"> 💳 إدارة وتفعيل شبكات الفروع</label>
+                  <label class="perm-item"><input type="checkbox" value="MANAGE_EXPENSES" class="perm-check"> 🧾 إدارة واعتماد المصروفات</label>
+                  <label class="perm-item"><input type="checkbox" value="MANAGE_USERS" class="perm-check"> 👥 إدارة المستخدمين والصلاحيات</label>
+                  <label class="perm-item"><input type="checkbox" value="MANAGE_BRANCHES" class="perm-check"> 📍 إدارة الفروع والمواقع</label>
+                  <label class="perm-item"><input type="checkbox" value="VIEW_REPORTS" class="perm-check"> 📑 استخراج التقارير التنفيذية</label>
+                </div>
+              </div>
+
+              <button type="submit" id="userSubmitBtn" class="btn btn-primary btn-block" style="margin-top: 15px;" data-i18n="saveUserBtn">حفظ بيانات وصلاحيات المستخدم (Ctrl+S)</button>
+            </form>
+          </div>
+
+          <div class="card" style="margin-top: 25px;">
+            <div class="card-header">
+              <h3 data-i18n="usersListTitle">المستخدمون المسجلون ومصفوفة صلاحياتهم</h3>
+            </div>
+            <div class="table-responsive">
+              <table id="usersTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colUserId">معرف المستخدم</th>
+                    <th data-i18n="username">اسم الدخول</th>
+                    <th data-i18n="fullName">الاسم الكامل</th>
+                    <th data-i18n="role">الدور</th>
+                    <th data-i18n="colBranch">الفرع</th>
+                    <th data-i18n="permissions">الصلاحيات</th>
+                    <th data-i18n="colStatus">الحالة</th>
+                    <th data-i18n="colAction">الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 9. شاشة الفروع -->
+        <!-- ============================================================== -->
+        <section id="branchesView" class="view-section" style="display: none;">
+          <div class="card form-card">
+            <div class="card-header">
+              <h3 data-i18n="addBranchTitle">إضافة فرع تشغيلي جديد</h3>
+            </div>
+            <form id="branchForm" onsubmit="submitBranch(event); return false;">
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="branchName">اسم الفرع</label>
+                  <input type="text" id="branchName" required class="form-control" placeholder="مثال: فرع مكة 1">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="branchLocation">الموقع / العنوان</label>
+                  <input type="text" id="branchLocation" required class="form-control" placeholder="المدينة - الشارع">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block" data-i18n="addBranchBtn">إضافة الفرع</button>
+            </form>
+          </div>
+
+          <div class="card" style="margin-top: 25px;">
+            <div class="card-header">
+              <h3 data-i18n="branchesListTitle">الفروع المسجلة ومجلداتها في Google Drive</h3>
+            </div>
+            <div class="table-responsive">
+              <table id="branchesTable">
+                <thead>
+                  <tr>
+                    <th data-i18n="colBranchId">معرف الفرع</th>
+                    <th data-i18n="branchName">اسم الفرع</th>
+                    <th data-i18n="branchLocation">الموقع</th>
+                    <th data-i18n="colStatus">الحالة</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 10. شاشة التقارير المالية التنفيذية الديناميكية (A4 PDF & Excel) -->
+        <!-- ============================================================== -->
+                <!-- ============================================================== -->
+        <!-- 8. شاشة التقارير المالية التنفيذية المتقدمة (مبيعات + خزينة) -->
+        <!-- ============================================================== -->
+        <section id="reportsView" class="view-section" style="display: none;">
+          
+          <!-- بطاقة توثيق آخر تقرير تم تنزيله في المنشأة -->
+          <div id="latestReportCard" class="card" style="margin-bottom: 18px; background: linear-gradient(135deg, #F8FAFC, #EFF6FF); border: 1px solid #BFDBFE;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div>
+                <span style="font-size:0.8rem; font-weight:800; color:#2563EB;">🕒 آخر تقرير تم تنزيله في النظام:</span>
+                <h4 id="latestReportDesc" style="margin:4px 0; font-size:1.05rem; color:#0F172A;">جاري فحص سجل التقارير...</h4>
+                <p id="latestReportMeta" style="font-size:0.82rem; color:#64748B; margin:0;">-</p>
+              </div>
+              <div id="latestReportAction">
+                <!-- زر فتح / تحميل التقرير -->
+              </div>
+            </div>
+          </div>
+
+          <!-- نموذج إعداد وتخصيص التقارير -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h3 style="font-weight:900; color:var(--google-dark);">📊 محرك التقارير المالية والطباعة التنفيذية</h3>
+              <p class="subtitle">استخراج تقارير تفصيلية شاملة للمبيعات أو الخزينة، مع إمكانية تحديد فرع واحد أو جميع الفروع وطباعتها فورياً</p>
+            </div>
+
+            <!-- أزرار التبديل بين نوع التقرير: مبيعات vs خزينة -->
+            <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
+              <button type="button" id="repTypeSalesBtn" class="btn btn-primary" onclick="setReportType('SALES')" style="flex:1; min-height:46px;">
+                💵 تقرير مبيعات الفروع والإغلاقات اليومية
+              </button>
+              <button type="button" id="repTypeTreasuryBtn" class="btn btn-outline" onclick="setReportType('TREASURY')" style="flex:1; min-height:46px;">
+                🏦 تقرير أستاذ الخزينة والسيولة النقدية
+              </button>
+            </div>
+
+            <form id="reportForm" onsubmit="return false;">
+              <!-- أزرار الفلترة التاريخية السريعة -->
+              <div style="margin-bottom: 14px;">
+                <label style="font-size:0.85rem; font-weight:700; color:var(--google-gray); display:block; margin-bottom:6px;">⚡ فلاتر سريعة للفترة الزمنية:</label>
+                <div class="filter-actions" style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button type="button" class="btn btn-sm btn-filter" onclick="setRepDateQuick('today')">اليوم</button>
+                  <button type="button" class="btn btn-sm btn-filter" onclick="setRepDateQuick('yesterday')">أمس</button>
+                  <button type="button" class="btn btn-sm btn-filter" onclick="setRepDateQuick('week')">هذا الأسبوع</button>
+                  <button type="button" class="btn btn-sm btn-filter" onclick="setRepDateQuick('month')">هذا الشهر</button>
+                  <button type="button" class="btn btn-sm btn-filter" onclick="setRepDateQuick('all')">كامل السجل</button>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label data-i18n="fromDate">من تاريخ</label>
+                  <input type="date" id="repStartDate" required class="form-control">
+                </div>
+                <div class="form-group col-half">
+                  <label data-i18n="toDate">إلى تاريخ</label>
+                  <input type="date" id="repEndDate" required class="form-control">
+                </div>
+              </div>
+
+              <!-- تحديد الفرع: فرع واحد أو جميع الفروع -->
+              <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="font-weight:700;">📍 نطاق الفروع (تحديد فرع واحد أو جميع الفروع):</label>
+                  <button type="button" class="btn-link" onclick="toggleMultiBranchSelector()" id="toggleMultiBranchBtn">
+                    🎛️ تحديد فروع متعددة مخصصة
+                  </button>
+                </div>
+                
+                <!-- القائمة المنسدلة المباشرة لتحديد فرع واحد أو الكل -->
+                <select id="repBranchSelect" class="form-control" onchange="onRepBranchSelectChange()">
+                  <option value="ALL">🌐 جميع الفروع الموحدة (مصفوفة شاملة)</option>
+                </select>
+
+                <!-- قسم مربعات الاختيار في حال أراد اختيار مخصص -->
+                <div id="repCustomBranchesBox" style="display:none; margin-top:10px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:0.82rem; font-weight:700; color:#2563EB;">اختر الفروع المراد تضمينها في التقرير:</span>
+                    <div style="display:flex; gap:6px;">
+                      <button type="button" class="btn btn-sm btn-outline" onclick="selectAllReportBranches(true)">تحديد الكل</button>
+                      <button type="button" class="btn btn-sm btn-outline" onclick="selectAllReportBranches(false)">إلغاء التحديد</button>
+                    </div>
+                  </div>
+                  <div id="reportBranchesCheckboxes" class="branch-checkboxes-grid">
+                    <!-- يتم بناؤها آلياً -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- أزرار الإجراءات والطباعة والتصدير -->
+              <div class="btn-group" style="margin-top: 15px; display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" id="repPrintBtn" class="btn btn-success" onclick="previewAndPrintReport()" style="flex:1; min-height:46px;">
+                  🖨️ معاينة وطباعة فورية A4 (طباعة تفصيلية فورية)
+                </button>
+                <button type="button" id="repPdfBtn" class="btn btn-primary" onclick="triggerReportGeneration('PDF')" style="flex:1; min-height:46px;">
+                  📄 حفظ PDF في Google Drive
+                </button>
+                <button type="button" id="repExcelBtn" class="btn btn-secondary" onclick="triggerReportGeneration('EXCEL')" style="flex:1; min-height:46px;">
+                  📊 تصدير شيت إكسل مفصل (Excel XLSX)
+                </button>
+              </div>
+            </form>
+            
+            <div id="reportResult" style="margin-top: 20px;"></div>
+          </div>
+
+          <!-- بطاقة الجدولة الآلية لإرسال تقرير المبيعات للإيميل الساعة 01:00 ص -->
+          <div class="card form-card" style="margin-top: 20px; border-left: 4px solid #1a73e8;">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="font-size:1.05rem; font-weight:800; color:var(--google-dark);">⏰ الجدولة الآلية لإرسال تقرير المبيعات للإيميل (الساعة 1 صباحاً)</h3>
+                <p class="subtitle" style="margin:0;">إرسال ملف PDF التنفيذي بمبيعات الفروع آلياً لإيميل الإدارة يومياً في الوقت المحدد</p>
+              </div>
+              <span class="badge badge-primary">مجدول آلياً</span>
+            </div>
+            
+            <div class="form-row" style="margin-top:14px;">
+              <div class="form-group col-half">
+                <label>📧 بريد المدير العام / الإدارة المستلم:</label>
+                <input type="email" id="autoEmailInput" class="form-control" placeholder="admin@orchid.com" value="admin@orchid.com">
+              </div>
+              <div class="form-group col-half">
+                <label>🕒 وقت الإرسال التلقائي اليومي:</label>
+                <select id="autoEmailHour" class="form-control">
+                  <option value="1" selected>01:00 ص (الساعة 1:00 صباحاً - الافتراضي المعتمد)</option>
+                  <option value="2">02:00 ص (الساعة 2:00 صباحاً)</option>
+                  <option value="6">06:00 ص (الساعة 6:00 صباحاً)</option>
+                  <option value="0">12:00 منتصف الليل</option>
+                  <option value="23">11:00 م (الساعة 11:00 مساءً)</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:8px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:700; font-size:0.9rem;">
+                <input type="checkbox" id="autoEmailEnabled" checked style="width:18px; height:18px; cursor:pointer;">
+                <span>تفعيل الجدولة والإرسال التلقائي اليومي</span>
+              </label>
+
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-outline" onclick="sendTestReportEmailNow()">
+                  ✉️ إرسال تقرير تجريبي الآن للإيميل
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveAutoEmailSettings()">
+                  💾 حفظ وتثبيت الجدولة الآلية
+                </button>
+              </div>
+            </div>
+            <div id="autoEmailStatusResult" style="margin-top:12px;"></div>
+          </div>
+
+          <!-- سجل التقارير السابقة والتدقيق -->
+          <div class="card" style="margin-top: 24px;">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="font-size:1.1rem; font-weight:800;">📑 سجل التقارير المستخرجة سابقاً (Report Audit Logs)</h3>
+                <p class="subtitle" style="margin:0;">سجل كامل بالتقارير الصادرة ومن استخرجها وروابط فتحها المباشرة</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" onclick="loadReportLogs()">🔄 تحديث السجل</button>
+            </div>
+            <div class="table-responsive" style="margin-top:12px;">
+              <table class="table" id="reportLogsTable">
+                <thead>
+                  <tr>
+                    <th>رقم التقرير</th>
+                    <th>تاريخ ووقت الاستخراج</th>
+                    <th>مستخرج التقرير</th>
+                    <th>نوع التقرير</th>
+                    <th>الفروع المشمولة</th>
+                    <th>الرابط والتحميل</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="6" style="text-align:center; color:#64748B;">جاري تحميل سجل التقارير...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- 9. شاشة إدارة المهام والعمليات (Tasks & Operations Management) -->
+        <!-- ============================================================== -->
+        <section id="tasksView" class="view-section" style="display: none;">
+          <div class="card form-card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h3 style="font-size:1.15rem; font-weight:900;">📋 إدارة المهام ومتابعة الإشعارات التشغيلية</h3>
+                <p class="subtitle" style="margin:0;">المهام المحولة من الإشعارات وفروقات التدقيق وسندات الخزينة</p>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="toggleNewTaskForm()">+ إضافة مهمة جديدة</button>
+            </div>
+
+            <!-- نموذج إضافة مهمة جديدة (اختياري) -->
+            <div id="newTaskFormContainer" style="display:none; background:var(--background); padding:16px; border-radius:10px; border:1px solid var(--border); margin-top:14px;">
+              <h4 style="font-size:0.95rem; margin-bottom:10px;">إضافة مهمة تشغيلية جديدة:</h4>
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label>عنوان المهمة:</label>
+                  <input type="text" id="taskTitleInput" class="form-control" placeholder="مثال: مراجعة عجز مبيعات فرع الرياض">
+                </div>
+                <div class="form-group col-half">
+                  <label>الفرع المعني:</label>
+                  <select id="taskBranchSelect" class="form-control">
+                    <option value="الفرع الرئيسي">الفرع الرئيسي</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-half">
+                  <label>المسؤول المكلّف:</label>
+                  <input type="text" id="taskAssigneeInput" class="form-control" placeholder="اسم الموظف أو الكاشير">
+                </div>
+                <div class="form-group col-half">
+                  <label>درجة الأولوية:</label>
+                  <select id="taskPrioritySelect" class="form-control">
+                    <option value="عالية">عالية 🔴</option>
+                    <option value="متوسطة" selected>متوسطة 🟡</option>
+                    <option value="عادية">عادية 🟢</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>تفاصيل وملاحظات المهمة:</label>
+                <textarea id="taskDescInput" class="form-control" rows="2" placeholder="اكتب تفاصيل المهمة المطلوب إنجازها"></textarea>
+              </div>
+              <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button type="button" class="btn btn-outline btn-sm" onclick="toggleNewTaskForm()">إلغاء</button>
+                <button type="button" class="btn btn-success btn-sm" onclick="submitNewTask()">حفظ المهمة</button>
+              </div>
+            </div>
+
+            <!-- قائمة المهام التفاعلية -->
+            <div style="margin-top:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="display:flex; gap:6px;">
+                  <button type="button" class="btn btn-sm btn-filter active" onclick="filterTasks('ALL')">كافة المهام</button>
+                  <button type="button" class="btn btn-sm btn-filter" onclick="filterTasks('PENDING')">قيد التنفيذ ⏳</button>
+                  <button type="button" class="btn btn-sm btn-filter" onclick="filterTasks('COMPLETED')">المكتملة ✅</button>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline" onclick="loadTasks()">🔄 تحديث المهام</button>
+              </div>
+
+              <div id="tasksListContainer" class="tasks-container">
+                <p style="color:#64748B; text-align:center; padding:15px;">جاري جلب قائمة المهام...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- الشريط السفلي للجوال (Mobile Bottom Navigation Bar) مع أيقونات Google -->
+  <nav class="mobile-bottom-nav">
+    <button type="button" class="mobile-nav-btn active" onclick="switchView('dashboardView')">
+      <span class="material-symbols-outlined">analytics</span><small data-i18n="navDashShort">الداشبورد</small>
+    </button>
+    <button type="button" class="mobile-nav-btn" onclick="switchView('salesView')">
+      <span class="material-symbols-outlined">payments</span><small data-i18n="navSalesShort">المبيعات</small>
+    </button>
+    <button type="button" class="mobile-nav-btn" onclick="switchView('auditView')">
+      <span class="material-symbols-outlined">fact_check</span><small data-i18n="navAuditShort">التدقيق</small>
+    </button>
+    <button type="button" class="mobile-nav-btn" onclick="switchView('treasuryView')">
+      <span class="material-symbols-outlined">account_balance</span><small data-i18n="navTreasuryShort">الخزينة</small>
+    </button>
+    <button type="button" class="mobile-nav-btn" onclick="switchView('chatView')">
+      <span class="material-symbols-outlined">forum</span><small data-i18n="navChatShort">الشات</small>
+    </button>
+  </nav>
+
+  <script src="js/app.js"></script>
+
+  <!-- ============================================================== -->
+  <!-- نوافذ نظام الاتصال الصوتي المباشر بين الإدارة والموظفين WebRTC -->
+  <!-- ============================================================== -->
+  
+  <!-- نافذة إجراء مكالمة صادرة (Outgoing Call Modal) -->
+  <div id="outgoingCallModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 360px; text-align: center; border-radius: 20px;">
+      <div style="margin-top: 15px;">
+        <div class="calling-pulse-avatar">
+          <span class="material-symbols-outlined" style="font-size: 48px; color: #ffffff;">call</span>
+        </div>
+        <h3 id="callTargetName" style="font-size: 1.2rem; font-weight: 800; margin-top: 15px; color: var(--google-dark);">اسم الموظف</h3>
+        <p id="callTargetBranch" style="font-size: 0.85rem; color: var(--google-gray); margin-bottom: 4px;">الفرع الرئيسي</p>
+        <div id="callTimerDisplay" style="font-size: 1.1rem; font-weight: 900; color: #16a34a; margin: 10px 0;">جاري الاتصال...</div>
+      </div>
+      
+      <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0 10px;">
+        <button type="button" class="btn-circle btn-circle-mute" id="callMuteBtn" onclick="OrchidCallSystem.toggleMute()" title="كتم الصوت">
+          <span class="material-symbols-outlined" id="callMuteIcon">mic</span>
+        </button>
+        <button type="button" class="btn-circle btn-circle-end" onclick="OrchidCallSystem.endCall()" title="إنهاء المكالمة">
+          <span class="material-symbols-outlined">call_end</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة استقبال مكالمة واردة (Incoming Call Alert Modal) -->
+  <div id="incomingCallModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card" style="max-width: 360px; text-align: center; border-radius: 20px; border: 2px solid #16a34a;">
+      <div style="margin-top: 15px;">
+        <div class="incoming-pulse-avatar">
+          <span class="material-symbols-outlined" style="font-size: 48px; color: #ffffff;">ring_volume</span>
+        </div>
+        <h3 id="incomingCallerName" style="font-size: 1.2rem; font-weight: 800; margin-top: 15px; color: var(--google-dark);">مكالمة واردة</h3>
+        <p id="incomingCallerMeta" style="font-size: 0.85rem; color: #16a34a; font-weight: 700;">المدير العام (الإدارة العامة)</p>
+        <p style="font-size: 0.8rem; color: var(--google-gray);">يرغب بالتحدث معك صوتياً عبر النظام الآن</p>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 20px; margin: 25px 0 10px;">
+        <button type="button" class="btn-circle btn-circle-accept" onclick="OrchidCallSystem.acceptCall()" title="قبول المكالمة">
+          <span class="material-symbols-outlined">call</span>
+        </button>
+        <button type="button" class="btn-circle btn-circle-decline" onclick="OrchidCallSystem.declineCall()" title="رفض">
+          <span class="material-symbols-outlined">call_end</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
